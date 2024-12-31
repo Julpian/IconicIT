@@ -8,17 +8,33 @@ import streamlit as st
 from sklearn.preprocessing import StandardScaler
 
 
-# Convert image to base64
-with Image.open('/download.jpg') as img:
-    buffered = BytesIO()
-    img.save(buffered, format="JPEG")
-    img_str = base64.b64encode(buffered.getvalue()).decode()
+# URL gambar dengan format raw
+image_url = "https://raw.githubusercontent.com/Julpian/IconicIT/main/download.jpg"
 
-# Convert logo to base64
-with Image.open('logo.png') as logo:
-    logo_buffered = BytesIO()
-    logo.save(logo_buffered, format="PNG")
-    logo_str = base64.b64encode(logo_buffered.getvalue()).decode()
+# Convert image from GitHub raw URL to base64
+response = requests.get(image_url)
+response.raise_for_status()  # Error jika URL gagal diakses
+
+# Membuka gambar dan mengonversinya ke base64
+img = Image.open(BytesIO(response.content))
+buffered = BytesIO()
+img.save(buffered, format="JPEG")
+img_str = base64.b64encode(buffered.getvalue()).decode()
+
+# URL logo dengan format raw
+logo_url = "https://raw.githubusercontent.com/Julpian/IconicIT/main/logo.png"
+
+# Convert logo from GitHub raw URL to base64
+response = requests.get(logo_url)
+response.raise_for_status()  # Error jika URL gagal diakses
+
+# Membuka logo dan mengonversinya ke base64
+logo = Image.open(BytesIO(response.content))
+logo_buffered = BytesIO()
+logo.save(logo_buffered, format="PNG")
+logo_str = base64.b64encode(logo_buffered.getvalue()).decode()
+
+print("Logo Base64:", logo_str)
 
 # Set up the page
 st.set_page_config(
@@ -133,30 +149,31 @@ elif page == "Prediksi":
         - Klik tombol *Prediksi Profil* untuk melihat hasilnya.
         """
     )
-    # Load scaler
-    scaler_path = "scaler.pkl"
+    # URL raw untuk scaler dan model
+    scaler_url = "https://raw.githubusercontent.com/Julpian/IconicIT/main/scaler.pkl"
+    model_url = "https://raw.githubusercontent.com/Julpian/IconicIT/main/knn_model.pkl"
 
-    if os.path.exists(scaler_path):
-        try:
-            scaler = joblib.load(scaler_path)
-            st.write('Scaler loaded successfully!')
-        except Exception as e:
-            st.error(f"An error occurred while loading the scaler: {e}")
-    else:
-        st.error(f"Scaler file not found at {scaler_path}.")
+    # Fungsi untuk mengunduh file dari URL dan memuatnya
+    def load_file_from_url(url):
+        response = requests.get(url)
+        response.raise_for_status()  # Pastikan file berhasil diunduh
+        return BytesIO(response.content)
 
-    # Path to the model
-    model_path = "knn_model.pkl"
+    # Memuat scaler
+    try:
+        scaler_data = load_file_from_url(scaler_url)
+        scaler = joblib.load(scaler_data)
+        st.write('Scaler loaded successfully!')
+    except Exception as e:
+        st.error(f"An error occurred while loading the scaler: {e}")
 
-    # Load model
-    if os.path.exists(model_path):
-        try:
-            profil_model = joblib.load(model_path)
-            st.write('Model loaded successfully!')
-        except Exception as e:
-            st.error(f"An error occurred while loading the model: {e}")
-    else:
-        st.error(f"Model file not found at {model_path}.")
+    # Memuat model
+    try:
+        model_data = load_file_from_url(model_url)
+        profil_model = joblib.load(model_data)
+        st.write('Model loaded successfully!')
+    except Exception as e:
+        st.error(f"An error occurred while loading the model: {e}")
 
     # Input from user
     st.header('Input Data')
