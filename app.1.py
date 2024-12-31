@@ -3,6 +3,7 @@ import os
 import base64
 from io import BytesIO
 from PIL import Image
+import requests
 import numpy as np
 import streamlit as st
 from sklearn.preprocessing import StandardScaler
@@ -149,6 +150,7 @@ elif page == "Prediksi":
         - Klik tombol *Prediksi Profil* untuk melihat hasilnya.
         """
     )
+    
     # URL raw untuk scaler dan model
     scaler_url = "https://raw.githubusercontent.com/Julpian/IconicIT/main/scaler.pkl"
     model_url = "https://raw.githubusercontent.com/Julpian/IconicIT/main/knn_model.pkl"
